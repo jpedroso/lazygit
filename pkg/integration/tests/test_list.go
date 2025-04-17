@@ -51,6 +51,7 @@ var tests = []*components.IntegrationTest{
 	branch.MoveCommitsToNewBranchFromMainBranch,
 	branch.MoveCommitsToNewBranchKeepStacked,
 	branch.NewBranchAutostash,
+	branch.NewBranchFromMainBranchBehindUpstream,
 	branch.NewBranchFromRemoteTrackingDifferentName,
 	branch.NewBranchFromRemoteTrackingSameName,
 	branch.NewBranchWithPrefix,
