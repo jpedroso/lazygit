@@ -306,11 +306,15 @@ type TranslationSet struct {
 	ViewMergeRebaseOptionsTooltip         string
 	ViewMergeOptions                      string
 	ViewRebaseOptions                     string
+	ViewCherryPickOptions                 string
+	ViewRevertOptions                     string
 	NotMergingOrRebasing                  string
 	AlreadyRebasing                       string
 	RecentRepos                           string
 	MergeOptionsTitle                     string
 	RebaseOptionsTitle                    string
+	CherryPickOptionsTitle                string
+	RevertOptionsTitle                    string
 	CommitSummaryTitle                    string
 	CommitDescriptionTitle                string
 	CommitDescriptionSubTitle             string
@@ -344,10 +348,15 @@ type TranslationSet struct {
 	PullRequestNoUpstream                 string
 	ErrorOccurred                         string
 	NoRoom                                string
-	YouAreHere                            string
+	ConflictLabel                         string
+	PendingRebaseTodosSectionHeader       string
+	PendingCherryPicksSectionHeader       string
+	PendingRevertsSectionHeader           string
+	CommitsSectionHeader                  string
 	YouDied                               string
 	RewordNotSupported                    string
 	ChangingThisActionIsNotAllowed        string
+	NotAllowedMidCherryPickOrRevert       string
 	DroppingMergeRequiresSingleSelection  string
 	CherryPickCopy                        string
 	CherryPickCopyTooltip                 string
@@ -392,6 +401,8 @@ type TranslationSet struct {
 	MergingStatus                         string
 	LowercaseRebasingStatus               string
 	LowercaseMergingStatus                string
+	LowercaseCherryPickingStatus          string
+	LowercaseRevertingStatus              string
 	AmendingStatus                        string
 	CherryPickingStatus                   string
 	UndoingStatus                         string
@@ -719,7 +730,6 @@ type TranslationSet struct {
 	FocusCommandLog                          string
 	CommandLogHeader                         string
 	RandomTip                                string
-	SelectParentCommitForMerge               string
 	ToggleWhitespaceInDiffView               string
 	ToggleWhitespaceInDiffViewTooltip        string
 	IgnoreWhitespaceDiffViewSubTitle         string
@@ -764,6 +774,7 @@ type TranslationSet struct {
 	OpenCommitInBrowser                      string
 	ViewBisectOptions                        string
 	ConfirmRevertCommit                      string
+	ConfirmRevertCommitRange                 string
 	RewordInEditorTitle                      string
 	RewordInEditorPrompt                     string
 	CheckoutAutostashPrompt                  string
@@ -1359,11 +1370,15 @@ func EnglishTranslationSet() *TranslationSet {
 		ViewMergeRebaseOptionsTooltip:        "View options to abort/continue/skip the current merge/rebase.",
 		ViewMergeOptions:                     "View merge options",
 		ViewRebaseOptions:                    "View rebase options",
+		ViewCherryPickOptions:                "View cherry-pick options",
+		ViewRevertOptions:                    "View revert options",
 		NotMergingOrRebasing:                 "You are currently neither rebasing nor merging",
 		AlreadyRebasing:                      "Can't perform this action during a rebase",
 		RecentRepos:                          "Recent repositories",
 		MergeOptionsTitle:                    "Merge options",
 		RebaseOptionsTitle:                   "Rebase options",
+		CherryPickOptionsTitle:               "Cherry-pick options",
+		RevertOptionsTitle:                   "Revert options",
 		CommitSummaryTitle:                   "Commit summary",
 		CommitDescriptionTitle:               "Commit description",
 		CommitDescriptionSubTitle:            "Press {{.togglePanelKeyBinding}} to toggle focus, {{.commitMenuKeybinding}} to open menu",
@@ -1381,7 +1396,7 @@ func EnglishTranslationSet() *TranslationSet {
 		SecondaryTitle:                       "Secondary",
 		ReflogCommitsTitle:                   "Reflog",
 		GlobalTitle:                          "Global keybindings",
-		ConflictsResolved:                    "All merge conflicts resolved. Continue?",
+		ConflictsResolved:                    "All merge conflicts resolved. Continue the %s?",
 		Continue:                             "Continue",
 		UnstagedFilesAfterConflictsResolved:  "Files have been modified since conflicts were resolved. Auto-stage them and continue?",
 		Keybindings:                          "Keybindings",
@@ -1405,10 +1420,15 @@ func EnglishTranslationSet() *TranslationSet {
 		PullRequestNoUpstream:                "Cannot open a pull request for a branch with no upstream",
 		ErrorOccurred:                        "An error occurred! Please create an issue at",
 		NoRoom:                               "Not enough room",
-		YouAreHere:                           "YOU ARE HERE",
+		ConflictLabel:                        "CONFLICT",
+		PendingRebaseTodosSectionHeader:      "Pending rebase todos",
+		PendingCherryPicksSectionHeader:      "Pending cherry-picks",
+		PendingRevertsSectionHeader:          "Pending reverts",
+		CommitsSectionHeader:                 "Commits",
 		YouDied:                              "YOU DIED!",
 		RewordNotSupported:                   "Rewording commits while interactively rebasing is not currently supported",
 		ChangingThisActionIsNotAllowed:       "Changing this kind of rebase todo entry is not allowed",
+		NotAllowedMidCherryPickOrRevert:      "This action is not allowed while cherry-picking or reverting",
 		DroppingMergeRequiresSingleSelection: "Dropping a merge commit requires a single selected item",
 		CherryPickCopy:                       "Copy (cherry-pick)",
 		CherryPickCopyTooltip:                "Mark commit as copied. Then, within the local commits view, you can press `{{.paste}}` to paste (cherry-pick) the copied commit(s) into your checked out branch. At any time you can press `{{.escape}}` to cancel the selection.",
@@ -1451,8 +1471,10 @@ func EnglishTranslationSet() *TranslationSet {
 		MovingStatus:                         "Moving",
 		RebasingStatus:                       "Rebasing",
 		MergingStatus:                        "Merging",
-		LowercaseRebasingStatus:              "rebasing", // lowercase because it shows up in parentheses
-		LowercaseMergingStatus:               "merging",  // lowercase because it shows up in parentheses
+		LowercaseRebasingStatus:              "rebasing",       // lowercase because it shows up in parentheses
+		LowercaseMergingStatus:               "merging",        // lowercase because it shows up in parentheses
+		LowercaseCherryPickingStatus:         "cherry-picking", // lowercase because it shows up in parentheses
+		LowercaseRevertingStatus:             "reverting",      // lowercase because it shows up in parentheses
 		AmendingStatus:                       "Amending",
 		CherryPickingStatus:                  "Cherry-picking",
 		UndoingStatus:                        "Undoing",
@@ -1779,7 +1801,6 @@ func EnglishTranslationSet() *TranslationSet {
 		FocusCommandLog:                          "Focus command log",
 		CommandLogHeader:                         "You can hide/focus this panel by pressing '%s'\n",
 		RandomTip:                                "Random tip",
-		SelectParentCommitForMerge:               "Select parent commit for merge",
 		ToggleWhitespaceInDiffView:               "Toggle whitespace",
 		ToggleWhitespaceInDiffViewTooltip:        "Toggle whether or not whitespace changes are shown in the diff view.",
 		IgnoreWhitespaceDiffViewSubTitle:         "(ignoring whitespace)",
@@ -1823,6 +1844,7 @@ func EnglishTranslationSet() *TranslationSet {
 		OpenCommitInBrowser:                      "Open commit in browser",
 		ViewBisectOptions:                        "View bisect options",
 		ConfirmRevertCommit:                      "Are you sure you want to revert {{.selectedCommit}}?",
+		ConfirmRevertCommitRange:                 "Are you sure you want to revert the selected commits?",
 		RewordInEditorTitle:                      "Reword in editor",
 		RewordInEditorPrompt:                     "Are you sure you want to reword this commit in your editor?",
 		HardResetAutostashPrompt:                 "Are you sure you want to hard reset to '%s'? An auto-stash will be performed if necessary.",

@@ -43,8 +43,10 @@ func doTheRebaseForAmendTests(t *TestDriver, keys config.KeybindingConfig) {
 
 	t.Views().Commits().
 		Lines(
+			Contains("--- Pending rebase todos ---"),
 			Contains("pick").Contains("commit three"),
-			Contains("conflict").Contains("<-- YOU ARE HERE --- file1 changed in branch"),
+			Contains("pick").Contains("<-- CONFLICT --- file1 changed in branch"),
+			Contains("--- Commits ---"),
 			Contains("commit two"),
 			Contains("file1 changed in master"),
 			Contains("base commit"),
@@ -61,7 +63,7 @@ func doTheRebaseForAmendTests(t *TestDriver, keys config.KeybindingConfig) {
 
 	t.ExpectPopup().Confirmation().
 		Title(Equals("Continue")).
-		Content(Contains("All merge conflicts resolved. Continue?")).
+		Content(Contains("All merge conflicts resolved. Continue the rebase?")).
 		Cancel()
 }
 

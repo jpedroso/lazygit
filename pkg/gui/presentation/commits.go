@@ -56,7 +56,6 @@ func GetCommitListDisplayStrings(
 	endIdx int,
 	showGraph bool,
 	bisectInfo *git_commands.BisectInfo,
-	showYouAreHereLabel bool,
 ) [][]string {
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -185,11 +184,6 @@ func GetCommitListDisplayStrings(
 	for i, commit := range filteredCommits {
 		unfilteredIdx := i + startIdx
 		bisectStatus = getBisectStatus(unfilteredIdx, commit.Hash, bisectInfo, bisectBounds)
-		isYouAreHereCommit := false
-		if showYouAreHereLabel && (commit.Action == models.ActionConflict || unfilteredIdx == rebaseOffset) {
-			isYouAreHereCommit = true
-			showYouAreHereLabel = false
-		}
 		isMarkedBaseCommit := commit.Hash != "" && commit.Hash == markedBaseCommit
 		if isMarkedBaseCommit {
 			willBeRebased = true
@@ -211,7 +205,6 @@ func GetCommitListDisplayStrings(
 			fullDescription,
 			bisectStatus,
 			bisectInfo,
-			isYouAreHereCommit,
 		))
 	}
 	return lines
@@ -364,7 +357,6 @@ func displayCommit(
 	fullDescription bool,
 	bisectStatus BisectStatus,
 	bisectInfo *git_commands.BisectInfo,
-	isYouAreHereCommit bool,
 ) []string {
 	bisectString := getBisectStatusText(bisectStatus, bisectInfo)
 
@@ -395,8 +387,7 @@ func displayCommit(
 
 	actionString := ""
 	if commit.Action != models.ActionNone {
-		todoString := lo.Ternary(commit.Action == models.ActionConflict, "conflict", commit.Action.String())
-		actionString = actionColorMap(commit.Action).Sprint(todoString) + " "
+		actionString = actionColorMap(commit.Action, commit.Status).Sprint(commit.Action.String()) + " "
 	}
 
 	tagString := ""
@@ -428,9 +419,8 @@ func displayCommit(
 	}
 
 	mark := ""
-	if isYouAreHereCommit {
-		color := lo.Ternary(commit.Action == models.ActionConflict, style.FgRed, style.FgYellow)
-		youAreHere := color.Sprintf("<-- %s ---", common.Tr.YouAreHere)
+	if commit.Status == models.StatusConflicted {
+		youAreHere := style.FgRed.Sprintf("<-- %s ---", common.Tr.ConflictLabel)
 		mark = fmt.Sprintf("%s ", youAreHere)
 	} else if isMarkedBaseCommit {
 		rebaseFromHere := style.FgYellow.Sprint(common.Tr.MarkedCommitMarker)
@@ -501,7 +491,7 @@ func getHashColor(
 		hashColor = style.FgYellow
 	case models.StatusMerged:
 		hashColor = style.FgGreen
-	case models.StatusRebasing:
+	case models.StatusRebasing, models.StatusCherryPickingOrReverting, models.StatusConflicted:
 		hashColor = style.FgBlue
 	case models.StatusReflog:
 		hashColor = style.FgBlue
@@ -519,7 +509,11 @@ func getHashColor(
 	return hashColor
 }
 
-func actionColorMap(action todo.TodoCommand) style.TextStyle {
+func actionColorMap(action todo.TodoCommand, status models.CommitStatus) style.TextStyle {
+	if status == models.StatusConflicted {
+		return style.FgRed
+	}
+
 	switch action {
 	case todo.Pick:
 		return style.FgCyan
@@ -529,8 +523,6 @@ func actionColorMap(action todo.TodoCommand) style.TextStyle {
 		return style.FgGreen
 	case todo.Fixup:
 		return style.FgMagenta
-	case models.ActionConflict:
-		return style.FgRed
 	default:
 		return style.FgYellow
 	}
